@@ -9,14 +9,25 @@ import cookieParser from 'cookie-parser';
 dotenv.config({
   path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
 });
-dotenv.config(); 
+dotenv.config();
 
 connectDB();
 
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+const allowedOrigins = [
+  'https://hrms-system-lemon.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(cookieParser());
 
 app.use('/api', routes);

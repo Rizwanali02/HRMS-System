@@ -11,4 +11,5 @@ router.use('/leave', leaveRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/admin', adminRoutes);
 
+
 export default router;

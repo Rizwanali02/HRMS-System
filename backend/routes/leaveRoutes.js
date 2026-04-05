@@ -8,6 +8,8 @@ router.use(protect);
 
 router.post('/apply', applyLeave);
 router.get('/my-leaves', getMyLeaves);
-router.route('/:id').put(editLeave).delete(cancelLeave);
+
+router.put('/:id', editLeave);
+router.delete('/:id', cancelLeave);
 
 export default router;
