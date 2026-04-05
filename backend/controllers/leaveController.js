@@ -121,22 +121,31 @@ export const editLeave = asyncHandler(async (req, res, next) => {
   }
 
   const { leaveType, startDate, endDate, reason } = req.body;
-  let totalDays = leave.totalDays;
 
-  if (startDate && endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    if (end < start) {
-      throw new ApiError(400, "End date cannot be before start date");
+  let start = leave.startDate;
+  let end = leave.endDate;
+  let totalDays = leave.totalDays;
+  if (startDate || endDate) {
+    const sDate = startDate || leave.startDate;
+    const eDate = endDate || leave.endDate;
+
+    start = typeof sDate === 'string' ? parseDate(sDate, 'startDate') : sDate;
+    end = typeof eDate === 'string' ? parseDate(eDate, 'endDate') : eDate;
+
+    if (isBefore(end, start)) {
+      throw new ApiError(400, 'End date cannot be before start date');
     }
-    const diffTime = Math.abs(end - start);
-    totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    totalDays = countWorkingDays(start, end);
+    if (totalDays === 0) {
+      throw new ApiError(400, 'Selected date range has no working days');
+    }
   }
 
   leave = await Leave.findByIdAndUpdate(req.params.id, {
     leaveType: leaveType || leave.leaveType,
-    startDate: startDate || leave.startDate,
-    endDate: endDate || leave.endDate,
+    startDate: start,
+    endDate: end,
     reason: reason || leave.reason,
     totalDays
   }, {
